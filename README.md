@@ -164,6 +164,4 @@ Items are 0-indexed in the same item-id space as the GRID release.
 ## Surveyed papers
 
 The full list of **94** generative-recommendation papers surveyed in
-this work — together with their venue, year, and a brief overview of
-the venue/year distribution — is available in
-[`SURVEYED_PAPERS.md`](SURVEYED_PAPERS.md).
+this work is available in [`SURVEYED_PAPERS.md`](SURVEYED_PAPERS.md).
