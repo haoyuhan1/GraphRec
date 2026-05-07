@@ -8,7 +8,6 @@ Run once per dataset (after the GRID data is in place):
     python src/prepare_data.py --dataset beauty
     python src/prepare_data.py --dataset sports
     python src/prepare_data.py --dataset toys
-    python src/prepare_data.py --dataset cds
 """
 import argparse
 import collections

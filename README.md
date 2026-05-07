@@ -16,7 +16,7 @@ GraphRec/
 ├── requirements.txt
 ├── src/
 │   ├── tgh.py                    # TGH-1 and TGH-2 inference (single entry point)
-│   ├── dataset_configs.py        # paths for the four datasets
+│   ├── dataset_configs.py        # paths for the three datasets
 │   ├── generate_embeddings.py    # google/flan-t5-xl item embeddings (step 2)
 │   └── prepare_data.py           # build transition_graph.pkl (step 3)
 ├── scripts/
@@ -55,8 +55,8 @@ data/<dataset>/
 └── items/         # tfrecord.gz shards with item id + text
 ```
 
-We use the four pre-processed Amazon datasets — **Beauty**, **Sports**, **Toys**,
-and **CDs** — released alongside the [GRID project](https://github.com/snap-research/GRID/),
+We use the three pre-processed Amazon datasets — **Beauty**, **Sports**, and
+**Toys** — released alongside the [GRID project](https://github.com/snap-research/GRID/),
 which in turn re-uses the splits from the [P5 paper](https://arxiv.org/abs/2203.13366).
 Download the bundle from this [Google Drive link](https://drive.google.com/file/d/1B5_q_MT3GYxmHLrMK0-lAqgpbAuikKEz/view?usp=sharing)
 (provided by GRID) and extract it under `data/`. After download, you should have:
@@ -65,7 +65,6 @@ Download the bundle from this [Google Drive link](https://drive.google.com/file/
 data/beauty/{training,evaluation,testing,items}/*.tfrecord.gz
 data/sports/...
 data/toys/...
-data/cds/...
 ```
 
 (The GRID release uses folder names `train/validation/test`; both layouts
@@ -80,7 +79,6 @@ with the attention mask, max_length=128 — same recipe as GRID):
 python src/generate_embeddings.py --dataset beauty
 python src/generate_embeddings.py --dataset sports
 python src/generate_embeddings.py --dataset toys
-python src/generate_embeddings.py --dataset cds
 ```
 
 This downloads `google/flan-t5-xl` from Hugging Face on first run and writes:
@@ -98,7 +96,6 @@ GPUs with negligible downstream impact.
 python src/prepare_data.py --dataset beauty
 python src/prepare_data.py --dataset sports
 python src/prepare_data.py --dataset toys
-python src/prepare_data.py --dataset cds
 ```
 
 For each dataset, this scans `training/*.tfrecord.gz`, counts consecutive
@@ -122,11 +119,11 @@ The script prints Recall@{1,5,10} and NDCG@{1,5,10} on the test split and
 writes top-10 predictions to `predictions/<dataset>/<method>.pkl` as a list of
 `{"user_id", "item_ids", "gt_ids"}` records.
 
-### Sweep all four datasets and both methods
+### Sweep all datasets and both methods
 
 ```bash
-bash scripts/run_all.sh                                    # GPU 0, all 4 datasets
-GPU_IDS="0 1 2 3" bash scripts/run_all.sh                  # parallel across GPUs
+bash scripts/run_all.sh                                    # GPU 0, all 3 datasets
+GPU_IDS="0 1 2" bash scripts/run_all.sh                    # parallel across GPUs
 DATASETS="beauty sports" bash scripts/run_all.sh           # subset
 ```
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run TGH-1 and TGH-2 over the four release datasets.
+# Run TGH-1 and TGH-2 over the three release datasets.
 #
 # Usage:
 #   bash scripts/run_all.sh                  # default GPUs / workers
@@ -11,7 +11,7 @@ set -e
 cd "$(dirname "$0")/.."
 
 read -ra GPUS <<< "${GPU_IDS:-0}"
-read -ra DATASETS <<< "${DATASETS:-beauty sports toys cds}"
+read -ra DATASETS <<< "${DATASETS:-beauty sports toys}"
 WORKERS=${ASSEMBLE_WORKERS:-8}
 USER_CHUNK=${USER_CHUNK:-4000}
 

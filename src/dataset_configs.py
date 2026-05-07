@@ -1,4 +1,4 @@
-"""Dataset paths for the four release datasets (beauty, sports, toys, cds).
+"""Dataset paths for the three release datasets (beauty, sports, toys).
 
 Each name corresponds to a folder under `<repo>/data/`. The semantic embedding
 file is `t5xl.pkl` inside that folder.
@@ -8,7 +8,7 @@ import os
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 _DATA_ROOT = os.path.join(_REPO_ROOT, "data")
 
-_DATASETS = ["beauty", "sports", "toys", "cds"]
+_DATASETS = ["beauty", "sports", "toys"]
 
 DATASET_CONFIGS = {
     name: {

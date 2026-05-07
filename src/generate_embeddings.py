@@ -11,7 +11,7 @@ attention mask. Output:
 
 This matches GRID's `sem_embeds_inference_flat` recipe (T5EncoderModel +
 MeanAggregation, max_length=128) without the Hydra/Lightning dependency, so
-the four-file release stays self-contained.
+the release stays self-contained.
 
 Usage:
     python src/generate_embeddings.py --dataset beauty
