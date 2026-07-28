@@ -8,6 +8,26 @@ We introduce **TGH** (Transition-Graph Heuristic), a training-free recommender. 
 - **TGH-1** (single-source): rings 1, 2, 3 around the user's last item.
 - **TGH-2** (multi-source): rings 1, 2 around the last and second-to-last items.
 
+## Quick start
+
+```bash
+# 1. Prepare a dataset
+python -m src.prepare yelp
+
+# 2. Generate embeddings and transition graph
+python src/generate_embeddings.py --dataset yelp
+python src/prepare_data.py --dataset yelp
+
+# 3. Verify data statistics
+python src/verify_datasets.py --dataset yelp
+
+# 4. Reproduce TGH results
+DATASETS="yelp" bash scripts/run_all.sh
+```
+
+See the [detailed walkthrough](#detailed-walkthrough) below for each step and
+the other 13 datasets.
+
 ## Repository layout
 
 ```
@@ -83,7 +103,7 @@ filtering protocols differ and are documented at the top of each module in
 [`src/prepare/`](src/prepare/) — they are not interchangeable, and the exact
 choices are what reproduce the counts above.
 
-## Quick start
+## Detailed walkthrough
 
 ### 1. Data preparation
 
