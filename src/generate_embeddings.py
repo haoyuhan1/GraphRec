@@ -27,7 +27,7 @@ import tensorflow as tf
 import torch
 from transformers import AutoTokenizer, T5EncoderModel
 
-from dataset_configs import DATASET_CONFIGS
+from dataset_configs import DATASET_CONFIGS, resolve_datasets, resolve_split_dir
 
 tf.config.set_visible_devices([], "GPU")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
@@ -38,11 +38,12 @@ MAX_LENGTH = 128
 
 def load_items(data_dir):
     """Yield (item_id, text) pairs from items/*.tfrecord.gz."""
-    paths = sorted(glob.glob(os.path.join(data_dir, "items", "*.tfrecord.gz")))
+    items_dir = resolve_split_dir(data_dir, "items")
+    paths = sorted(glob.glob(os.path.join(items_dir, "*.tfrecord.gz")))
     if not paths:
         raise FileNotFoundError(
-            f"No items/*.tfrecord.gz under {data_dir}. Place the GRID-format "
-            f"item shards there first."
+            f"No *.tfrecord.gz under {items_dir}. Prepare the dataset first: "
+            f"`python -m src.prepare <name>` (see the README)."
         )
     for fp in paths:
         for raw in tf.data.TFRecordDataset([fp], compression_type="GZIP"):
@@ -66,22 +67,7 @@ def encode(model, tokenizer, texts, device):
     return pooled.cpu().float().numpy()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="beauty",
-                        choices=list(DATASET_CONFIGS))
-    parser.add_argument("--data_dir", default=None)
-    parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--dtype", choices=["float32", "bfloat16", "float16"],
-                        default="float32",
-                        help="Encoder dtype. The release ships float32 embeddings; "
-                             "bfloat16/float16 cuts time in half on most GPUs with "
-                             "negligible downstream impact.")
-    parser.add_argument("--overwrite", action="store_true")
-    args = parser.parse_args()
-
-    data_dir = args.data_dir or DATASET_CONFIGS[args.dataset]["data_dir"]
+def embed_dataset(data_dir, model, tokenizer, emb_dim, args):
     pt_path = os.path.join(data_dir, "t5xl.pt")
     pkl_path = os.path.join(data_dir, "t5xl.pkl")
     if not args.overwrite and os.path.exists(pkl_path) and os.path.exists(pt_path):
@@ -100,14 +86,6 @@ def main():
         n_out = max_iid + 1
     else:
         n_out = n
-
-    print(f"Loading {MODEL_NAME} (this downloads ~10 GB on first use) ...")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    dtype_map = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}
-    model = T5EncoderModel.from_pretrained(MODEL_NAME, torch_dtype=dtype_map[args.dtype])
-    model.eval().to(args.device)
-    emb_dim = model.config.d_model
-    print(f"  encoder dim = {emb_dim}, dtype = {args.dtype}")
 
     emb_matrix = np.zeros((n_out, emb_dim), dtype=np.float32)
     seen = np.zeros(n_out, dtype=bool)
@@ -137,6 +115,53 @@ def main():
     with open(pkl_path, "wb") as f:
         pickle.dump(records, f)
     print(f"Done. {len(records):,} embeddings (dim={emb_dim}).")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--dataset", nargs="+", default=["beauty"],
+                        help="dataset name(s), or 'all'")
+    parser.add_argument("--data_dir", default=None,
+                        help="Override the data dir (single dataset only).")
+    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--dtype", choices=["float32", "bfloat16", "float16"],
+                        default="float32",
+                        help="Encoder dtype. The paper used float32; "
+                             "bfloat16/float16 cuts time in half on most GPUs with "
+                             "negligible downstream impact.")
+    parser.add_argument("--overwrite", action="store_true")
+    args = parser.parse_args()
+
+    names = resolve_datasets(args.dataset)
+    if args.data_dir and len(names) > 1:
+        parser.error("--data_dir only makes sense with a single dataset")
+
+    todo = []
+    for name in names:
+        data_dir = args.data_dir or DATASET_CONFIGS[name]["data_dir"]
+        if not os.path.isdir(data_dir):
+            print(f"[skip] {name}: {data_dir} not found — prepare it first.")
+            continue
+        todo.append((name, data_dir))
+    if not todo:
+        return
+
+    # The encoder is ~10 GB; load it once and reuse across datasets.
+    print(f"Loading {MODEL_NAME} (this downloads ~10 GB on first use) ...")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    dtype_map = {"float32": torch.float32, "bfloat16": torch.bfloat16,
+                 "float16": torch.float16}
+    model = T5EncoderModel.from_pretrained(MODEL_NAME, torch_dtype=dtype_map[args.dtype])
+    model.eval().to(args.device)
+    emb_dim = model.config.d_model
+    print(f"  encoder dim = {emb_dim}, dtype = {args.dtype}")
+
+    for name, data_dir in todo:
+        print(f"\n=== {DATASET_CONFIGS[name]['display']} ({name}) ===")
+        embed_dataset(data_dir, model, tokenizer, emb_dim, args)
 
 
 if __name__ == "__main__":

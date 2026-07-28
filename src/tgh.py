@@ -31,7 +31,7 @@ import scipy.sparse as sp
 import torch
 import tensorflow as tf
 
-from dataset_configs import DATASET_CONFIGS
+from dataset_configs import DATASET_CONFIGS, resolve_split_dir
 
 tf.config.set_visible_devices([], "GPU")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
@@ -41,7 +41,8 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 
 def load_test_sequences(data_dir):
     gt, sec_last, history = {}, {}, {}
-    for fpath in sorted(glob.glob(os.path.join(data_dir, "testing", "*.tfrecord.gz"))):
+    test_dir = resolve_split_dir(data_dir, "testing")
+    for fpath in sorted(glob.glob(os.path.join(test_dir, "*.tfrecord.gz"))):
         ds = tf.data.TFRecordDataset([fpath], compression_type="GZIP")
         for raw in ds:
             ex = tf.train.Example()
@@ -81,7 +82,8 @@ def load_graph(data_dir):
             return pickle.load(f)
     print("Graph not found — building from training data ...")
     edge_counts = collections.Counter()
-    for fpath in sorted(glob.glob(os.path.join(data_dir, "training", "*.tfrecord.gz"))):
+    train_dir = resolve_split_dir(data_dir, "training")
+    for fpath in sorted(glob.glob(os.path.join(train_dir, "*.tfrecord.gz"))):
         ds = tf.data.TFRecordDataset([fpath], compression_type="GZIP")
         for raw in ds:
             ex = tf.train.Example()
@@ -626,7 +628,10 @@ def main():
                         help="TGH-2 source-3 per-ring budget (history[-2] anchor).")
     parser.add_argument("--edge_weight_alpha", type=float, default=0.5)
     parser.add_argument("--top_k", type=int, default=10)
-    parser.add_argument("--user_chunk", type=int, default=8000)
+    parser.add_argument("--user_chunk", type=int, default=None,
+                        help="Users per GPU matmul. Defaults to the per-dataset "
+                             "value in dataset_configs.py, which scales as "
+                             "1/n_items; lower it if you OOM.")
     parser.add_argument("--max_explicit_depth", type=int, default=None,
                         help="Cap on rings materialised globally (deeper rings "
                              "become catch-all NOT(visited ∪ history)).")
@@ -642,6 +647,7 @@ def main():
     cfg = DATASET_CONFIGS[args.dataset]
     if args.data_dir is None: args.data_dir = cfg["data_dir"]
     if args.emb_path is None: args.emb_path = cfg["emb_path"]
+    if args.user_chunk is None: args.user_chunk = cfg["user_chunk"]
 
     tf.get_logger().setLevel("ERROR")
     random.seed(args.seed)
