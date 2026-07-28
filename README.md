@@ -118,10 +118,10 @@ every dataset it can fetch unattended, then verifies each against the table
 above. Or per dataset:
 
 ```bash
-python -m src.prepare yelp          # raw -> data/yelp/{training,evaluation,testing,items}
-python src/generate_embeddings.py --dataset yelp
-python src/prepare_data.py --dataset yelp
-python src/verify_datasets.py --dataset yelp
+python -m src.prepare beauty        # GRID bundle -> data/beauty/{train,validation,test,items}
+python src/generate_embeddings.py --dataset beauty
+python src/prepare_data.py --dataset beauty
+python src/verify_datasets.py --dataset beauty
 ```
 
 `--dataset all` works for each of these. Raw downloads are cached under
