@@ -12,17 +12,17 @@ We introduce **TGH** (Transition-Graph Heuristic), a training-free recommender. 
 
 ```bash
 # 1. Prepare a dataset
-python -m src.prepare yelp
+python -m src.prepare delicious
 
 # 2. Generate embeddings and transition graph
-python src/generate_embeddings.py --dataset yelp
-python src/prepare_data.py --dataset yelp
+python src/generate_embeddings.py --dataset delicious
+python src/prepare_data.py --dataset delicious
 
 # 3. Verify data statistics
-python src/verify_datasets.py --dataset yelp
+python src/verify_datasets.py --dataset delicious
 
 # 4. Reproduce TGH results
-DATASETS="yelp" bash scripts/run_all.sh
+DATASETS="delicious" bash scripts/run_all.sh
 ```
 
 See the [detailed walkthrough](#detailed-walkthrough) below for each step and
