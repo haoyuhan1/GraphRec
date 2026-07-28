@@ -8,8 +8,9 @@ Raw downloads are cached under `--raw_dir` (default `<data_root>/_raw/<name>`)
 so re-running is cheap. Output goes to `<data_root>/<name>/`, where data_root
 is `<repo>/data` unless `GRAPHREC_DATA_ROOT` says otherwise.
 
-Beauty / Sports / Toys are not built here — they are distributed pre-built by
-the GRID project; see the README.
+Beauty / Sports / Toys are not rebuilt from raw reviews — the `grid_bundle`
+module downloads the GRID project's pre-built splits from Google Drive instead;
+see the README.
 """
 import argparse
 import importlib
@@ -47,8 +48,9 @@ def build(name, raw_dir=None, out_dir=None):
     print(f"  raw: {raw_dir}\n  out: {out_dir}", flush=True)
 
     t0 = time.time()
-    # goodreads serves two datasets from one module and needs to know which.
-    if module_name == "goodreads":
+    # A few modules serve several datasets from one entry point and need to know
+    # which: goodreads (comics/children) and grid_bundle (beauty/sports/toys).
+    if module_name in ("goodreads", "grid_bundle"):
         stats = module.prepare(raw_dir, out_dir, dataset=name)
     else:
         stats = module.prepare(raw_dir, out_dir)

@@ -5,3 +5,4 @@ tensorflow>=2.15
 transformers>=4.40
 sentencepiece>=0.1.99
 pandas>=2.0          # H&M and Amazon-M2 preparation only
+gdown>=5.0           # download the GRID bundle (Beauty/Sports/Toys) from Google Drive

@@ -79,9 +79,9 @@ statistics below.
 
 | Dataset | #Users | #Items | #Edges | Avg. len | Source | Auto |
 |---|---:|---:|---:|---:|---|:--:|
-| Beauty | 22,363 | 12,101 | 114,582 | 8.15 | GRID bundle | — |
-| Sports | 35,598 | 18,357 | 180,610 | 7.96 | GRID bundle | — |
-| Toys | 19,412 | 11,924 | 102,268 | 7.97 | GRID bundle | — |
+| Beauty | 22,363 | 12,101 | 114,582 | 8.15 | GRID bundle | ✅ |
+| Sports | 35,598 | 18,357 | 180,610 | 7.96 | GRID bundle | ✅ |
+| Toys | 19,412 | 11,924 | 102,268 | 7.97 | GRID bundle | ✅ |
 | CDs | 75,258 | 64,443 | 810,347 | 14.58 | Amazon Reviews 2014 (SNAP) | ✅ |
 | Delicious | 718 | 1,200 | 4,016 | 9.13 | HetRec 2011 Delicious-2K | ✅ |
 | LastFM | 1,090 | 3,646 | 30,372 | 34.02 | HetRec 2011 Last.fm-2K | ✅ |
@@ -129,12 +129,17 @@ python src/verify_datasets.py --dataset yelp
 
 **Beauty / Sports / Toys** are the pre-processed splits released with the
 [GRID project](https://github.com/snap-research/GRID/), which re-uses the
-[P5 paper](https://arxiv.org/abs/2203.13366)'s splits. We link them rather than
-rebuilding so the item-id space stays identical to prior work. Download the
-bundle from GRID's [Google Drive link](https://drive.google.com/file/d/1B5_q_MT3GYxmHLrMK0-lAqgpbAuikKEz/view?usp=sharing)
-and extract it under `data/`, giving
-`data/beauty/{training,evaluation,testing,items}/*.tfrecord.gz`. The GRID
-release names its folders `train/validation/test`; both layouts work.
+[P5 paper](https://arxiv.org/abs/2203.13366)'s splits. We reuse them as-is
+rather than rebuilding, so the item-id space stays identical to prior work.
+`python -m src.prepare beauty` (or `sports` / `toys`) now downloads GRID's
+[Google Drive bundle](https://drive.google.com/file/d/1B5_q_MT3GYxmHLrMK0-lAqgpbAuikKEz/view?usp=sharing)
+via `gdown`, caches it once under `data/_raw/grid_bundle/`, and extracts the
+requested dataset into `data/<name>/`. Google Drive enforces a daily quota on
+large files; if it blocks the download the command prints the link so you can
+fetch the bundle by hand and extract it under `data/` — giving
+`data/beauty/{training,evaluation,testing,items}/*.tfrecord.gz` — which the rest
+of the pipeline picks up unchanged. The GRID release names its folders
+`train/validation/test`; both layouts work.
 
 **MIND**, **H&M** and **Amazon-M2-UK** must be downloaded by hand — they sit
 behind a licence acceptance or a competition login and cannot be scripted.

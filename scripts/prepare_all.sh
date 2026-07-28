@@ -14,9 +14,9 @@
 #   EMBED_ARGS          extra flags for generate_embeddings.py
 #                       (e.g. "--dtype bfloat16 --batch_size 16")
 #
-# Beauty / Sports / Toys are downloaded pre-built from the GRID project — see
-# the README. H&M and Amazon-M2 need their raw CSVs placed by hand; this script
-# skips them with a note rather than failing.
+# Beauty / Sports / Toys are fetched pre-built from the GRID project's Google
+# Drive bundle (via gdown) — see the README. H&M and Amazon-M2 need their raw
+# CSVs placed by hand; this script skips them with a note rather than failing.
 
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -62,7 +62,7 @@ $PY src/verify_datasets.py --dataset $DATASETS || rc=1
 echo
 if [ $rc -ne 0 ]; then
     echo "Some datasets are not ready. Common reasons:"
-    echo "  beauty/sports/toys : download the GRID bundle (see README)"
+    echo "  beauty/sports/toys : GRID bundle download failed (Drive quota?) — see README"
     echo "  mind               : needs HF_TOKEN"
     echo "  hm, amazon-m2-uk   : place the Kaggle CSVs under <data_root>/_raw/<name>/"
 fi

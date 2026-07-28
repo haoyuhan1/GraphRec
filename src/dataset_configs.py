@@ -48,9 +48,9 @@ _SPLIT_ALIASES = {
 
 _SPEC = [
     # name                 display              n_users    n_items    n_edges  avg_len  chunk  prepare
-    ("beauty",             "Beauty",              22363,     12101,    114582,    8.15,  8000, None),
-    ("sports",             "Sports",              35598,     18357,    180610,    7.96,  8000, None),
-    ("toys",               "Toys",                19412,     11924,    102268,    7.97,  8000, None),
+    ("beauty",             "Beauty",              22363,     12101,    114582,    8.15,  8000, "grid_bundle"),
+    ("sports",             "Sports",              35598,     18357,    180610,    7.96,  8000, "grid_bundle"),
+    ("toys",               "Toys",                19412,     11924,    102268,    7.97,  8000, "grid_bundle"),
     ("cds",                "CDs",                 75258,     64443,    810347,   14.58,  6000, "cds"),
     ("delicious",          "Delicious",             718,      1200,      4016,    9.13,  8000, "delicious"),
     ("lastfm",             "LastFM",               1090,      3646,     30372,   34.02,  8000, "lastfm"),
@@ -86,7 +86,9 @@ DATASET_CONFIGS = {
 # URLs it expects. See the README for details.
 MANUAL_DOWNLOAD = {"mind", "hm", "amazon-m2-uk"}
 
-# Distributed pre-built by the GRID project rather than prepared here.
+# Datasets with no prepare module (built entirely outside this repo). Beauty /
+# Sports / Toys used to live here; they are now fetched by the `grid_bundle`
+# module, so this is empty — kept as the hook for any future drop-in dataset.
 PREBUILT = {name for name, cfg in DATASET_CONFIGS.items() if cfg["prepare"] is None}
 
 ALL_DATASETS = list(DATASET_CONFIGS)
