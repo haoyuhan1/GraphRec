@@ -25,7 +25,7 @@ GraphRec/
 │   └── verify_datasets.py        # check prepared data against the paper's stats
 ├── scripts/
 │   ├── prepare_all.sh            # one-shot: download -> TFRecords -> embeddings -> graph
-│   └── run_all.sh                # sweep all (dataset, method) pairs over GPUs
+│   └── run_all.sh                # run TGH-1 and TGH-2 over all datasets on GPUs
 └── data/                         # populated per "Data preparation" below
     ├── _raw/<dataset>/           # cached raw downloads
     └── <dataset>/
